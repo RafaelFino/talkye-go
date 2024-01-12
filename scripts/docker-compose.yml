@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  talkye:
+    
+    networks:
+      - talkyenet
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: talkye
+      POSTGRES_PASSWORD_FILE: /etc/.db-secret
+      POSTGRES_USER: talkye
+    restart: unless-stopped
+    volumes:
+      - "./dbdata:/var/lib/postgresql/data"
+      - "./etc/.db-secret:/etc/.db-secret"
+    networks:
+      - talkyenet
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - talkyenet
+
+networks:  
+  talkyenet:
