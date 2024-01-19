@@ -9,8 +9,8 @@ import (
 )
 
 type Storage struct {
-	Config *config.Config
-	DbConn *db.DB
+	Config *config.DBConfig
+	DbConn *sql.DB
 }
 
 func NewStorage(config *config.DBConfig) *Storage {
@@ -38,4 +38,15 @@ func (s *Storage) Close() {
 	if s.DbConn != nil {
 		s.DbConn.Close()
 	}
+}
+
+func (s *Storage) GetDatabase() (*sql.DB, error) {
+	if s.DbConn == nil {
+		err := s.Initialize()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return s.DbConn, nil
 }
