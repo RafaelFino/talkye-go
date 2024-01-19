@@ -4,13 +4,46 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	rotatelogs "github.com/lestrrat/go-file-rotatelogs"
+
+	config "talkye/internal/config"
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Print("Usage: talkye <config_file>\n")
+		os.Exit(1)
+	}
 
+	configFile := os.Args[1]
+
+	cfg, err := config.LoadConfigFromFile(configFile)
+	if err != nil {
+		fmt.Printf("Error loading config file %s: %s\n", configFile, err)
+		os.Exit(1)
+	}
+
+	err = initLogger(cfg.LogPath)
+	if err != nil {
+		fmt.Printf("Error opening log file: %s, using stdout", err)
+		log.SetOutput(os.Stdout)
+	}
+
+	fmt.Printf("%s\nStarting...", getLogo())
+
+	//service := procspy.NewSpy(cfg)
+	//go spy.Start(onUpdate)
+	//defer spy.Stop()
+
+	quitChannel := make(chan os.Signal, 1)
+	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
+	<-quitChannel
+
+	log.Print("Stopping...\n")
 }
 
 func initLogger(path string) error {

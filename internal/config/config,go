@@ -1,0 +1,84 @@
+package config
+
+import (
+	"bufio"
+	"encoding/json"
+	"log"
+	"os"
+)
+
+type Config struct {
+	LogPath  string        `json:"log_path"`
+	Database *DBConfig     `json: database"`
+	Broker   *BrokerConfig `json: broker"`
+}
+
+func NewConfig() *Config {
+	return &Config{
+		LogPath:  "/var/log",
+		Database: NewDatabaseConfig(),
+		Broker:   NewBrokerConfig(),
+	}
+}
+
+func (c *Config) SaveToFile(filename string) error {
+	log.Printf("Saving config to file: %s", filename)
+
+	file, err := os.Create(filename)
+	if err != nil {
+		log.Printf("Error creating file: %s", err)
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(c.ToJson())
+	if err != nil {
+		log.Printf("Error writing to file: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) ToJson() string {
+	ret, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		log.Printf("Error marshalling config: %s", err)
+	}
+
+	return string(ret)
+}
+
+func LoadFromJson(json string) (*Config, error) {
+	ret := NewConfig()
+	err := json.Unmarshal([]byte(json), ret)
+	if err != nil {
+		log.Printf("Error unmarshalling config: %s", err)
+		return ret, err
+	}
+
+	return ret, nil
+}
+
+func LoadConfigFromFile(filename string) (*Config, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Printf("Error opening file: %s", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	jsonString := ""
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		jsonString += scanner.Text()
+	}
+
+	ret, err := LoadFromJson(jsonString)
+	if err != nil {
+		log.Printf("Error parsing json: %s", err)
+		return nil, err
+	}
+
+	return ret, err
+}
