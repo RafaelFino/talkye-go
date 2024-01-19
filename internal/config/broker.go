@@ -6,8 +6,8 @@ import (
 )
 
 type BrokerConfig struct {
-	Host string `json: host`
-	Port int    `json: port`
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 func NewBrokerConfig() *BrokerConfig {
@@ -21,15 +21,4 @@ func (c *BrokerConfig) ToJson() string {
 	}
 
 	return string(ret)
-}
-
-func LoadFromJson(json string) (*BrokerConfig, error) {
-	ret := NewBrokerConfig()
-	err := json.Unmarshal([]byte(json), ret)
-
-	if err != nil {
-		log.Printf("Error unmarshalling config: %s", err)
-	}
-
-	return ret, nil
 }

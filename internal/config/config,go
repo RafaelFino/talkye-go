@@ -9,8 +9,8 @@ import (
 
 type Config struct {
 	LogPath  string        `json:"log_path"`
-	Database *DBConfig     `json: database"`
-	Broker   *BrokerConfig `json: broker"`
+	Database *DBConfig     `json: "database"`
+	Broker   *BrokerConfig `json: "broker"`
 }
 
 func NewConfig() *Config {

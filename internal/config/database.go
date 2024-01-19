@@ -2,15 +2,16 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
 type DBConfig struct {
-	Host     string `json: host`
-	Port     int    `json: port`
-	Username string `json: username`
-	Password string `json: password`
-	Database string `json: database`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Database string `json:"database"`
 }
 
 func NewDatabaseConfig() *DBConfig {
@@ -26,13 +27,6 @@ func (c *DBConfig) ToJson() string {
 	return string(ret)
 }
 
-func LoadDBConfigFromJson(json string) (*DBConfig, error) {
-	ret := NewDatabaseConfig()
-	err := json.Unmarshal([]byte(json), ret)
-
-	if err != nil {
-		log.Printf("Error unmarshalling config: %s", err)
-	}
-
-	return ret, err
+func (c *DBConfig) ToConnectionString() string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.Username, c.Password, c.Database)
 }
